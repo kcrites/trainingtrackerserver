@@ -144,6 +144,7 @@ app.post('/updatepackage', (req, res) => {
 
 // Returns all of the training sessions for the user under the current package
 app.post('/gettrainings', (req, res) => {
+	console.log('gettrainings request made');
 	const { email, packageid } = req.body;
 	return db.select('*').from('sessions')
 	.where({email: email, packageid: packageid})
@@ -180,6 +181,7 @@ app.post('/addstats', (req, res) => {
 
 // Returns all of the stats for a user
 app.post('/getstats', (req, res) => {
+	console.log('getstats request made');
 	const { email} = req.body;
 	return db.select('*').from('stats')
 	.where('email', '=', email)
