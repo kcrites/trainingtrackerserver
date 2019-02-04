@@ -19,7 +19,8 @@ const database = {
 	password: 'dog',
 	joined: new Date()
 },
-	{ id:'124',
+	{
+	id:'124',
 	name: 'Jen',
 	email: 'jen@gmail.com',
 	password: 'cat',
@@ -40,6 +41,18 @@ app.post('/signin', (req, res) => {
 	}
 })
 
+app.post('/register', (req, res) => {
+const { email, name, password} = req.body
+	database.users.push({
+		id: '125',
+		name: name,
+		email: email,
+		password: password,
+		entries: 0,
+		joined: new Date()
+	});
+	res.json(database.users[database.users.length-1]);
+})
 //app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
 
 //app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
