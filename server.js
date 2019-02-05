@@ -39,6 +39,20 @@ const database = {
 
 app.get('/', (req, res) => { res.send('It is working'); })
 
+app.get('/profile/:id', (req, res) => {
+	const { id } = req.params;
+	let found = false;
+	database.users.forEach(user => {
+		if(user.id === id) {
+			found = true;
+			return res.json(user);
+		} 
+	})
+	if (!found) {
+		res.status(400).json('User not found.');
+	}
+})
+
 //app.post('/signin', signin.handleSignin(db, bcrypt))
 app.post('/signin', (req, res) => {
 	if(req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
@@ -62,7 +76,7 @@ const { email, name, password} = req.body
 	res.json(database.users[database.users.length-1]);
 })
 
-app.post('/stats', (req, res) => {
+app.post('/addstats', (req, res) => {
 	const {id, weight, height, bmi} = req.body
 		database.stats.push({
 			id:id,
@@ -75,6 +89,21 @@ app.post('/stats', (req, res) => {
 		res.json(database.stats[database.stats.length-1]);
 		console.log(database.stats)
 })
+
+app.post('/getstats', (req, res) => {
+	const { id } = req.body;
+	let found = false;
+	database.users.forEach(user => {
+		if(user.id === id) {
+			found = true;
+			return res.json(database.stats[0]);
+		} 
+	})
+	if (!found) {
+		res.status(400).json('User not found.');
+	}
+})
+
 //app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
 
 //app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
