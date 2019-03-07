@@ -2,12 +2,26 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
+const knex = require('knex');
 
 //Controllers
 /*const register = require('./controllers/register');
 const signin = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');*/
+
+const db = knex({
+  client: 'pg',
+  connection: {
+   host : '127.0.0.1',
+   user: '',
+   password: '',
+   database: 'trainingtest'
+  }
+});
+console.log(db.select('*').from('users').then(data => {
+
+}));
 
 const app = express();
 
@@ -19,7 +33,9 @@ const database = {
 		id: '123',
 		name: 'Ken',
 		email: 'ken@gmail.com',
+		height: 175,
 		password: 'dog',
+		isAdmin: true,
 		joined: new Date()
 		},
 		{
@@ -27,6 +43,7 @@ const database = {
 		name: 'Jen',
 		email: 'jen@gmail.com',
 		password: 'cat',
+		isAdmin: false,
 		joined: new Date()
 		}],
 	stats: [{
@@ -41,7 +58,16 @@ const database = {
 		id: '987',
 		hash: '$2a$10$tWppzxMhW1Rp9wVOzQbSU.OzKq.PaY02/GJ64ZmhUInsvhkKUFuF6',
 		email: 'ken@gmail.com'
-		}]
+		},{
+		id: '988',
+		hash: '$2a$10$tWppzxMhW1Rp9wVOzQbSU.OzKq.PaY02/GJ64ZmhUInsvhkKUFuF6',
+		email: 'hayden@gmail.com'	
+		}],
+	packages: [{
+		id: '223',
+		packageID: 103,
+		dateStarted: '03/01/2019'
+	}]
 }
 
 app.get('/', (req, res) => { res.send(database.users); })
@@ -49,15 +75,15 @@ app.get('/', (req, res) => { res.send(database.users); })
 app.get('/profile/:id', (req, res) => {
 	const { id } = req.params;
 	let found = false;
-	database.users.forEach(user => {
-		if(user.id === id) {
-			found = true;
-			return res.json(user);
-		} 
-	})
-	if (!found) {
-		res.status(400).json('User not found.');
-	}
+	db.select('*').from('users').where({id})
+	.then(user => {
+		if(user.length) {
+			res.json(user[0])
+		} else {
+			res.status(400).json('User Not Found')
+		}
+		})
+		.catch(err => res.status(400).json('Error getting user'))
 })
 
 //app.post('/signin', signin.handleSignin(db, bcrypt))
@@ -71,19 +97,23 @@ app.post('/signin', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-const { email, name, password} = req.body
+const { email, name, password, height} = req.body
 bcrypt.hash(password, null, null, function(err, hash) {
 	console.log(hash);
 });
-	database.users.push({
-		id: '125',
+	db('users')
+		.returning('*')
+		.insert({
 		name: name,
 		email: email,
-		
-		entries: 0,
-		joined: new Date()
-	});
-	res.json(database.users[database.users.length-1]);
+		height: height,
+		joined: new Date(),
+		isadmin: false
+	}).then(user => {
+		res.json(user[0]);
+	})
+	.catch(err => res.status(400).json('Unable to register'))
+	
 })
 
 app.post('/addstats', (req, res) => {
