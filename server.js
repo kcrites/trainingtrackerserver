@@ -19,9 +19,7 @@ const db = knex({
    database: 'trainingtest'
   }
 });
-console.log(db.select('*').from('users').then(data => {
 
-}));
 
 const app = express();
 
@@ -45,14 +43,6 @@ const database = {
 		password: 'cat',
 		isAdmin: false,
 		joined: new Date()
-		}],
-	stats: [{
-		id:'123',
-		weight: 93,
-		height:175,
-		bmi: 30.2,
-		workout: '12/12/1212',
-
 		}],
 	login: [{
 		id: '987',
@@ -116,19 +106,43 @@ bcrypt.hash(password, null, null, function(err, hash) {
 	
 })
 
-app.post('/addstats', (req, res) => {
-	const {id, weight, height, bmi} = req.body
-		database.stats.push({
-			id:id,
-			weight: weight,
-			height: height,
-			bmi: bmi,
-			workout: new Date()
-
-		});
-		res.json(database.stats[database.stats.length-1]);
-		console.log(database.stats)
+//Takes data from Training Date Input Form and send it to the DB
+app.post('/addtraining', (req, res) => {
+	const {trainingdate, email, packageid} = req.body
+		db('sessions')
+		.returning('*')
+		.insert({	
+					email: email,
+					trainingdate: trainingdate,
+					packageid: packageid
+				}).then( user => {
+		res.json(user[0]);
+	})
+	.catch(err => res.status(400).json('Unable to add training session'))
 })
+
+
+//Takes data from Stats Input Form and send it to the DB
+app.post('/addstats', (req, res) => {
+	const {name, height, weight, musclemass, fatlevel, bmi, vv, percentwater, statsdate, email} = req.body
+		db('stats')
+		.returning('*')
+		.insert({	
+					email: email,
+					weight: weight,
+					musclemass:musclemass,
+					fatlevel: fatlevel,
+					bmi: bmi,
+					vv:vv,
+					percentwater: percentwater,
+					statsdate: statsdate
+				}).then( user => {
+		res.json(user[0]);
+	})
+	.catch(err => res.status(400).json('Unable to add measurements'))
+})
+
+
 
 app.post('/getstats', (req, res) => {
 	const { id } = req.body;
@@ -142,6 +156,20 @@ app.post('/getstats', (req, res) => {
 	if (!found) {
 		res.status(400).json('User not found.');
 	}
+})
+
+app.post('/getpackage', (req, res) => {
+	const { email } = req.body;
+	let found = false;
+	db('package').where({email: email, completed: false}).select('*')
+	.then(pack => {
+		if(pack.length) {
+			res.json(pack[0])
+		} else {
+			res.status(400).json('User Package Not Found')
+		}
+		})
+		.catch(err => res.status(400).json(err + 'Error getting package information'))
 })
 
 //app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
