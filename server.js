@@ -26,41 +26,18 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const database = {
-	users: [ {
-		id: '123',
-		name: 'Ken',
-		email: 'ken@gmail.com',
-		height: 175,
-		password: 'dog',
-		isAdmin: true,
-		joined: new Date()
-		},
-		{
-		id:'124',
-		name: 'Jen',
-		email: 'jen@gmail.com',
-		password: 'cat',
-		isAdmin: false,
-		joined: new Date()
-		}],
-	login: [{
-		id: '987',
-		hash: '$2a$10$tWppzxMhW1Rp9wVOzQbSU.OzKq.PaY02/GJ64ZmhUInsvhkKUFuF6',
-		email: 'ken@gmail.com'
-		},{
-		id: '988',
-		hash: '$2a$10$tWppzxMhW1Rp9wVOzQbSU.OzKq.PaY02/GJ64ZmhUInsvhkKUFuF6',
-		email: 'hayden@gmail.com'	
-		}],
-	packages: [{
-		id: '223',
-		packageID: 103,
-		dateStarted: '03/01/2019'
-	}]
-}
 
-app.get('/', (req, res) => { res.send(database.users); })
+app.get('/', (req, res) => {
+	return db.select('*').from('users')
+	.then(users => {
+	if(users.length) {
+		res.json(users)
+	}	
+	else{
+		res.status(400).json('No Users in DB')
+	}
+}).catch(err => res.status(400).json('Error getting users list'))
+})
 
 app.get('/profile/:id', (req, res) => {
 	const { id } = req.params;
@@ -78,32 +55,52 @@ app.get('/profile/:id', (req, res) => {
 
 //app.post('/signin', signin.handleSignin(db, bcrypt))
 app.post('/signin', (req, res) => {
-	if(req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-		res.json(database.users[0]);
-	}
-	else {
-		res.status(400).json('Error logging in');
-	}
+	db.select('email', 'hash').from('login')
+	.where('email', '=', req.body.email)
+	.then(data => {
+		const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+		if(isValid) {
+			return db.select('*').from('users')
+			.where('email', '=', req.body.email)
+			.then(user => {
+				res.json(user[0])
+			})
+			.catch(err => res.status(400).json('Unable to get user'))
+		} else {
+				res.status(400).json('Wrong credentials')
+		}
+	})
+	.catch(err => res.status(400).json('Wrong credentials'))
 })
 
 app.post('/register', (req, res) => {
 const { email, name, password, height} = req.body
-bcrypt.hash(password, null, null, function(err, hash) {
-	console.log(hash);
-});
-	db('users')
-		.returning('*')
-		.insert({
-		name: name,
-		email: email,
-		height: height,
-		joined: new Date(),
-		isadmin: false
-	}).then(user => {
-		res.json(user[0]);
+const hash = bcrypt.hashSync(password);
+	db.transaction(trx => {
+		trx.insert({
+			hash: hash,
+			email: email
+		})
+		.into('login')
+		.returning('email')
+		.then(loginEmail => {
+			return trx('users')
+			.returning('*')
+			.insert({
+				name: name,
+				email: loginEmail[0],
+				height: height,
+				joined: new Date(),
+				isadmin: false
+				})
+				.then(user => {
+					res.json(user[0]);
+					})
+			})
+		.then(trx.commit)
+		.catch(trx.rollback)
 	})
-	.catch(err => res.status(400).json('Unable to register'))
-	
+	.catch(err => res.status(400).json('Unable to register'))	
 })
 
 //Takes data from Training Date Input Form and send it to the DB
@@ -138,6 +135,7 @@ app.post('/addstats', (req, res) => {
 					statsdate: statsdate
 				}).then( user => {
 		res.json(user[0]);
+
 	})
 	.catch(err => res.status(400).json('Unable to add measurements'))
 })
@@ -145,17 +143,13 @@ app.post('/addstats', (req, res) => {
 
 
 app.post('/getstats', (req, res) => {
-	const { id } = req.body;
-	let found = false;
-	database.users.forEach(user => {
-		if(user.id === id) {
-			found = true;
-			return res.json(database.stats[0]);
-		} 
+	const { email} = req.body;
+	return db.select('*').from('stats')
+	.where('email', '=', email)
+	.then(data => {
+		res.json(data)
 	})
-	if (!found) {
-		res.status(400).json('User not found.');
-	}
+	.catch(err => res.status(400).json('Unable to get stats history'))
 })
 
 app.post('/getpackage', (req, res) => {
