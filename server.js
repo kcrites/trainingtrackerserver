@@ -41,7 +41,6 @@ app.get('/', (req, res) => {
 
 app.get('/profile/:id', (req, res) => {
 	const { id } = req.params;
-	let found = false;
 	db.select('*').from('users').where({id})
 	.then(user => {
 		if(user.length) {
@@ -105,19 +104,34 @@ const hash = bcrypt.hashSync(password);
 
 //Takes data from Training Date Input Form and send it to the DB
 app.post('/addtraining', (req, res) => {
-	const {trainingdate, email, packageid} = req.body
+	const {sessiondate, email, packageid, packagedate} = req.body;
+	console.log(packagedate);
 		db('sessions')
 		.returning('*')
 		.insert({	
 					email: email,
-					trainingdate: trainingdate,
-					packageid: packageid
+					sessiondate: sessiondate,
+					packageid: packageid,
+					packagedate: packagedate
 				}).then( user => {
 		res.json(user[0]);
 	})
 	.catch(err => res.status(400).json('Unable to add training session'))
 })
 
+// Returns all of the training sessions for the user under the current package
+app.post('/gettrainings', (req, res) => {
+	const { email, packageid } = req.body;
+	db('sessions').where({email: email, packageid: packageid}).select('*')
+	.then(train => {
+		if(train.length) {
+			res.json(train[0])
+		} else {
+			res.status(400).json('User training sessions not found')
+		}
+		})
+		.catch(err => res.status(400).json(err + 'Error getting training information'))
+})
 
 //Takes data from Stats Input Form and send it to the DB
 app.post('/addstats', (req, res) => {
@@ -140,8 +154,7 @@ app.post('/addstats', (req, res) => {
 	.catch(err => res.status(400).json('Unable to add measurements'))
 })
 
-
-
+// Returns all of the stats for a user
 app.post('/getstats', (req, res) => {
 	const { email} = req.body;
 	return db.select('*').from('stats')
