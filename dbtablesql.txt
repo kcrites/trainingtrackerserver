@@ -1,0 +1,72 @@
+// stats Table
+
+CREATE TABLE stats (
+    id serial PRIMARY KEY,
+    email text NOT NULL,
+    weight NUMERIC NOT NULL,
+    musclemass NUMERIC NOT NULL,
+    fatlevel NUMERIC NOT NULL,
+    bmi NUMERIC NOT NULL,
+    vv NUMERIC NOT NULL,
+    percentwater NUMERIC NOT null,
+    statsdate date NOT NULL);
+
+db('stats')
+.returning('*')
+.insert({	
+			email: email,
+			weight: weight,
+			musclemass:musclemass,
+			fatlevel: fatlevel,
+			bmi: bmi,
+			vv:vv,
+			percentwater: percentwater,
+			statsdate: statsdate
+
+
+//Package Table
+
+CREATE TABLE package (
+	id serial PRIMARY KEY,
+	email text NOT NULL,
+	datestarted date NOT NULL,
+	packageid text NOT NULL,
+	completed BOOLEAN NOT NULL,
+	sessioncount smallint,
+	maxsessions SMALLINT NOT null);
+
+// User Table
+
+CREATE TABLE users (
+	id serial PRIMARY KEY,
+	name varchar(100),
+	email text NOT NULL,
+	joined timestamp NOT NULL,
+	height smallint,
+	isadmin boolean
+
+
+db('users')
+	.returning('*')
+	.insert({
+	name: name,
+	email: email,
+	height: height,
+	joined: new Date(),
+	isadmin: false
+
+//Login Table
+CREATE TABLE login (
+	id serial PRIMARY KEY,
+	hash varchar(100) NOT NULL,
+	email text NOT NULL);
+
+//sessions Table
+
+CREATE TABLE sessions (
+	id serial PRIMARY KEY,
+	sessiondate date NOT NULL,
+	email text NOT NULL,
+	packagedate date,
+	packageid smallint);
+

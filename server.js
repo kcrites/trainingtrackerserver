@@ -116,16 +116,40 @@ app.post('/addtraining', (req, res) => {
 				}).then( user => {
 		res.json(user[0]);
 	})
-	.catch(err => res.status(400).json('Unable to add training session'))
+	.catch(err => res.status(400).json('Unable to add training session'))	
+})
+
+// Increments the package used field in Packages table
+app.post('/updatepackage', (req, res) => {
+	const { email, packageid } = req.body;
+	db('package')
+	.where(
+		'packageid', '=', packageid, 'email', '=', email, 
+	)
+	.increment('sessioncount', 1)
+	.returning('*')
+	.then(pack =>{
+		console.log(`pack: ${pack[0]} sessioncount: ${pack[0].sessioncount}, maxsessions: ${pack[0].maxsessions}`)
+		if(pack[0].maxsessions === pack[0].sessioncount){
+			return db.update('completed', true).from('package')
+			.where('packageid', '=', packageid, 'email', '=', email)
+			.then(info => {
+				res.json(pack)})
+		} else{
+				res.json(pack);
+		}
+	})
+	.catch(err => res.status(400).json('Unable to increment session count'))	
 })
 
 // Returns all of the training sessions for the user under the current package
 app.post('/gettrainings', (req, res) => {
 	const { email, packageid } = req.body;
-	db('sessions').where({email: email, packageid: packageid}).select('*')
+	return db.select('*').from('sessions')
+	.where({email: email, packageid: packageid})
 	.then(train => {
 		if(train.length) {
-			res.json(train[0])
+			res.json(train)
 		} else {
 			res.status(400).json('User training sessions not found')
 		}
@@ -167,7 +191,6 @@ app.post('/getstats', (req, res) => {
 
 app.post('/getpackage', (req, res) => {
 	const { email } = req.body;
-	let found = false;
 	db('package').where({email: email, completed: false}).select('*')
 	.then(pack => {
 		if(pack.length) {
