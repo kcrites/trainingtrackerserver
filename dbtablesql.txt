@@ -29,9 +29,10 @@ db('stats')
 CREATE TABLE package (
 	id serial PRIMARY KEY,
 	email text NOT NULL,
-	datestarted date NOT NULL,
+	datestarted DATE NOT NULL,
 	packageid text NOT NULL,
 	completed BOOLEAN NOT NULL,
+    active BOOLEAN NOT NULL,
 	sessioncount smallint,
 	maxsessions SMALLINT NOT null);
 
@@ -43,7 +44,9 @@ CREATE TABLE users (
 	email text NOT NULL,
 	joined timestamp NOT NULL,
 	height smallint,
-	isadmin boolean
+	isadmin boolean,
+	istrainer boolean,
+	trainer varchar(100));
 
 
 db('users')

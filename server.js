@@ -90,7 +90,9 @@ const hash = bcrypt.hashSync(password);
 				email: loginEmail[0],
 				height: height,
 				joined: new Date(),
-				isadmin: false
+				isadmin: false,
+				istrainer: false,
+				trainer: 'Desire'
 				})
 				.then(user => {
 					res.json(user[0]);
@@ -129,7 +131,7 @@ app.post('/updatepackage', (req, res) => {
 	.increment('sessioncount', 1)
 	.returning('*')
 	.then(pack =>{
-		console.log(`pack: ${pack[0]} sessioncount: ${pack[0].sessioncount}, maxsessions: ${pack[0].maxsessions}`)
+		//console.log(`pack: ${pack[0]} sessioncount: ${pack[0].sessioncount}, maxsessions: ${pack[0].maxsessions}`)
 		if(pack[0].maxsessions === pack[0].sessioncount){
 			return db.update('completed', true).from('package')
 			.where('packageid', '=', packageid, 'email', '=', email)
@@ -144,7 +146,7 @@ app.post('/updatepackage', (req, res) => {
 
 // Returns all of the training sessions for the user under the current package
 app.post('/gettrainings', (req, res) => {
-	console.log('gettrainings request made');
+	//console.log('gettrainings request made');
 	const { email, packageid } = req.body;
 	return db.select('*').from('sessions')
 	.where({email: email, packageid: packageid})
@@ -181,7 +183,7 @@ app.post('/addstats', (req, res) => {
 
 // Returns all of the stats for a user
 app.post('/getstats', (req, res) => {
-	console.log('getstats request made');
+	//console.log('getstats request made');
 	const { email} = req.body;
 	return db.select('*').from('stats')
 	.where('email', '=', email)
@@ -193,7 +195,7 @@ app.post('/getstats', (req, res) => {
 
 app.post('/getpackage', (req, res) => {
 	const { email } = req.body;
-	db('package').where({email: email, completed: false}).select('*')
+	db('package').where({email: email, active: true}).select('*')
 	.then(pack => {
 		if(pack.length) {
 			res.json(pack[0])
@@ -202,6 +204,21 @@ app.post('/getpackage', (req, res) => {
 		}
 		})
 		.catch(err => res.status(400).json(err + 'Error getting package information'))
+})
+
+app.post('/getclients', (req,res) => {
+	//get clients of a trainer
+	console.log(req.body.trainer);
+	const { trainer } = req.body;
+	db('users')
+	.select('*')
+	.innerJoin('package', 'users.email', '=', 'package.email')
+	.where('trainer', '=', req.body.trainer)
+	.where('package.active', '=', true)
+	.then(list => {
+		//console.log(list.email);
+		res.json(list); })
+	.catch(err => res.status(400).json(err + ' Error getting clients package information'))
 })
 
 //app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
