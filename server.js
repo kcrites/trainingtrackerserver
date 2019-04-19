@@ -72,6 +72,16 @@ app.post('/signin', (req, res) => {
 	.catch(err => res.status(400).json('Wrong credentials'))
 })
 
+//Gets the client information for a trainer
+app.post('/trainergetclient', (req, res) => {
+	return db.select('*').from('users')
+			.where('email', '=', req.body.email)
+			.then(user => {
+				res.json(user[0])
+			})
+			.catch(err => res.status(400).json('Unable to get user'))
+		}) 
+
 app.post('/register', (req, res) => {
 const { email, name, password, height} = req.body
 const hash = bcrypt.hashSync(password);
@@ -146,7 +156,6 @@ app.post('/updatepackage', (req, res) => {
 
 // Returns all of the training sessions for the user under the current package
 app.post('/gettrainings', (req, res) => {
-	//console.log('gettrainings request made');
 	const { email, packageid } = req.body;
 	return db.select('*').from('sessions')
 	.where({email: email, packageid: packageid})
@@ -183,7 +192,6 @@ app.post('/addstats', (req, res) => {
 
 // Returns all of the stats for a user
 app.post('/getstats', (req, res) => {
-	//console.log('getstats request made');
 	const { email} = req.body;
 	return db.select('*').from('stats')
 	.where('email', '=', email)
@@ -208,12 +216,11 @@ app.post('/getpackage', (req, res) => {
 
 app.post('/getclients', (req,res) => {
 	//get clients of a trainer
-	console.log(req.body.trainer);
 	const { trainer } = req.body;
 	db('users')
 	.select('*')
 	.innerJoin('package', 'users.email', '=', 'package.email')
-	.where('trainer', '=', req.body.trainer)
+	.where('users.trainer', '=', req.body.trainer)
 	.where('package.active', '=', true)
 	.then(list => {
 		//console.log(list.email);
