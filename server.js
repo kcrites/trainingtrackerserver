@@ -83,7 +83,7 @@ app.post('/trainergetclient', (req, res) => {
 		}) 
 
 app.post('/register', (req, res) => {
-const { email, name, password, height} = req.body
+const { email, fname, lname, password, height} = req.body
 const hash = bcrypt.hashSync(password);
 	db.transaction(trx => {
 		trx.insert({
@@ -96,7 +96,8 @@ const hash = bcrypt.hashSync(password);
 			return trx('users')
 			.returning('*')
 			.insert({
-				name: name,
+				fname: fname,
+				lname: lname,
 				email: loginEmail[0],
 				height: height,
 				joined: new Date(),
@@ -152,6 +153,29 @@ app.post('/updatepackage', (req, res) => {
 		}
 	})
 	.catch(err => res.status(400).json('Unable to increment session count'))	
+})
+
+app.post('/addpackage', (req, res) => {
+	const { email, maxsessions, packagedate, packageid } = req.body;
+	db('package')
+	.returning('*')
+	.insert({	
+				email: email,
+				packageid: packageid,
+				sessioncount: 0,
+				maxsessions: maxsessions,
+				completed: false,
+				active: true,
+				packagedate: packagedate
+			})
+	.then(user => {
+		return db.update('active', false).from('package')
+					.where('email', '=', email, 'active', '=', true)
+					.then(info => {
+						res.json(user[0])
+					}).catch(err => res.status(400).json('Unable to update package: active'))
+	})
+	.catch(err => res.status(400).json('Unable to add package'))
 })
 
 // Returns all of the training sessions for the user under the current package

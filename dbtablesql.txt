@@ -40,7 +40,8 @@ CREATE TABLE package (
 
 CREATE TABLE users (
 	id serial PRIMARY KEY,
-	name varchar(100),
+	fname varchar(100),
+	lname varchar(100),
 	email text NOT NULL,
 	joined timestamp NOT NULL,
 	height smallint,
@@ -52,7 +53,8 @@ CREATE TABLE users (
 db('users')
 	.returning('*')
 	.insert({
-	name: name,
+	fname: fname,
+	lname: lname,
 	email: email,
 	height: height,
 	joined: new Date(),
