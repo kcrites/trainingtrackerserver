@@ -75,3 +75,6 @@ CREATE TABLE sessions (
 	packagedate date,
 	packageid smallint);
 
+
+	SELECT * FROM users LEFT OUTER JOIN package ON users.email = package.email WHERE users.email IN (SELECT email FROM users WHERE users.trainer = 'Desire') AND (package.packageid IS NULL OR package.active IS true);
+

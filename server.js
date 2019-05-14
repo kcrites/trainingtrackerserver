@@ -160,13 +160,13 @@ app.post('/addpackage', (req, res) => {
 	db('package')
 	.returning('*')
 	.insert({	
-				email: email,
-				packageid: packageid,
-				sessioncount: 0,
-				maxsessions: maxsessions,
-				completed: false,
-				active: true,
-				packagedate: packagedate
+			email: email,
+			packageid: packageid,
+			sessioncount: 0,
+			maxsessions: maxsessions,
+			completed: false,
+			active: true,
+			packagedate: packagedate
 			})
 	.then(user => {
 		return db.update('active', false).from('package')
@@ -199,14 +199,14 @@ app.post('/addstats', (req, res) => {
 		db('stats')
 		.returning('*')
 		.insert({	
-					email: email,
-					weight: weight,
-					musclemass:musclemass,
-					fatlevel: fatlevel,
-					bmi: bmi,
-					vv:vv,
-					percentwater: percentwater,
-					statsdate: statsdate
+				email: email,
+				weight: weight,
+				musclemass:musclemass,
+				fatlevel: fatlevel,
+				bmi: bmi,
+				vv:vv,
+				percentwater: percentwater,
+				statsdate: statsdate
 				}).then( user => {
 		res.json(user[0]);
 
@@ -241,15 +241,18 @@ app.post('/getpackage', (req, res) => {
 app.post('/getclients', (req,res) => {
 	//get clients of a trainer
 	const { trainer } = req.body;
-	db('users')
+	
+	db('package')
 	.select('*')
-	.innerJoin('package', 'users.email', '=', 'package.email')
-	.where('users.trainer', '=', req.body.trainer)
-	.where('package.active', '=', true)
+	.rightOuterJoin('users', 'users.email', '=', 'package.email')
+	.where('users.trainer', '=', trainer)
+	.andWhere('package.active', '=', true)
+	.orWhere(db.raw('package.packageid is NULL'))
+	.andWhere('users.istrainer', '=', false)
 	.then(list => {
-		//console.log(list.email);
-		res.json(list); })
-	.catch(err => res.status(400).json(err + ' Error getting clients package information'))
+		res.json(list); 
+	})
+	.catch(err => res.status(400).json(err + ' Error getting clients package information'));
 })
 
 //app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
