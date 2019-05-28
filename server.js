@@ -118,7 +118,6 @@ const hash = bcrypt.hashSync(password);
 //Takes data from Training Date Input Form and send it to the DB
 app.post('/addtraining', (req, res) => {
 	const {sessiondate, email, packageid, packagedate} = req.body;
-	console.log(packagedate);
 		db('sessions')
 		.returning('*')
 		.insert({	
@@ -156,8 +155,17 @@ app.post('/updatepackage', (req, res) => {
 })
 
 app.post('/addpackage', (req, res) => {
-	const { email, maxsessions, packagedate, packageid } = req.body;
-	db('package')
+	const { email, maxsessions, packagedate, packageid, newpackage } = req.body;
+	console.log(`${email} ${maxsessions} ${packagedate} ${packageid}`)
+	if(!newpackage) {
+		db.update('active', false).from('package')
+				.where('email', '=', email, 'active', '=', true)
+/*				.then(info => {
+					res.json(user[0])*/
+				.catch(err => res.status(400).json('Unable to update package: active'))
+}
+
+	return db('package')
 	.returning('*')
 	.insert({	
 			email: email,
@@ -166,23 +174,19 @@ app.post('/addpackage', (req, res) => {
 			maxsessions: maxsessions,
 			completed: false,
 			active: true,
-			packagedate: packagedate
+			datestarted: packagedate
 			})
 	.then(user => {
-		return db.update('active', false).from('package')
-					.where('email', '=', email, 'active', '=', true)
-					.then(info => {
-						res.json(user[0])
-					}).catch(err => res.status(400).json('Unable to update package: active'))
+		res.json(user[0])
 	})
-	.catch(err => res.status(400).json('Unable to add package'))
+	.catch(err => res.status(400).json('Unable to add package' + err))
 })
 
 // Returns all of the training sessions for the user under the current package
 app.post('/gettrainings', (req, res) => {
 	const { email, packageid } = req.body;
 	return db.select('*').from('sessions')
-	.where({email: email, packageid: packageid})
+	.where({email: email})
 	.then(train => {
 		if(train.length) {
 			res.json(train)
