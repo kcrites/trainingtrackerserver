@@ -9,6 +9,7 @@ const knex = require('knex');
 const signin = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');*/
+const check = require('./controllers/check');
 
 const db = knex({
   client: 'pg',
@@ -54,13 +55,16 @@ app.get('/profile/:id', (req, res) => {
 
 //app.post('/signin', signin.handleSignin(db, bcrypt))
 app.post('/signin', (req, res) => {
+	const { email, password } = req.body;
+	check.checkForEmail(email, res);
+	check.checkForPassword(password, res);
 	db.select('email', 'hash').from('login')
-	.where('email', '=', req.body.email)
+	.where('email', '=', email)
 	.then(data => {
-		const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+		const isValid = bcrypt.compareSync(password, data[0].hash);
 		if(isValid) {
 			return db.select('*').from('users')
-			.where('email', '=', req.body.email)
+			.where('email', '=', email)
 			.then(user => {
 				res.json(user[0])
 			})
@@ -84,6 +88,8 @@ app.post('/trainergetclient', (req, res) => {
 
 app.post('/register', (req, res) => {
 const { email, fname, lname, password, height} = req.body
+check.checkForEmail(email, res);
+check.checkForPassword(password, res);
 const hash = bcrypt.hashSync(password);
 	db.transaction(trx => {
 		trx.insert({
