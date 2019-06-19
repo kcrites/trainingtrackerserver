@@ -5,11 +5,13 @@ const cors = require('cors');
 const knex = require('knex');
 
 //Controllers
-/*const register = require('./controllers/register');
+const register = require('./controllers/register');
 const signin = require('./controllers/signin');
-const profile = require('./controllers/profile');
-const image = require('./controllers/image');*/
-const check = require('./controllers/check');
+const packages = require('./controllers/packages');
+const training = require('./controllers/training');
+const trainer = require('./controllers/trainer');
+const stats = require('./controllers/stats');
+//const profile = require('./controllers/profile');
 
 const db = knex({
   client: 'pg',
@@ -28,116 +30,37 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-app.get('/', (req, res) => {
-	return db.select('*').from('users')
-	.then(users => {
-	if(users.length) {
-		res.json(users)
-	}	
-	else{
-		res.status(400).json('No Users in DB')
-	}
-}).catch(err => res.status(400).json('Error getting users list'))
-})
+app.post('/signin', signin.handleSignin(db, bcrypt))
+app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
+app.post('/addtraining', (req, res) => {training.handleAddTraining(db, req, res)})
+app.post('/gettrainings', (req, res) => {training.handleGetTrainings(db, req, res)})
+app.post('/addstats', (req, res) => {stats.handleAddStats(db, req, res)})
+app.post('/getstats', (req, res) => {stats.handleGetStats(db, req, res)})
+app.post('/updatepackage', (req, res) => {packages.handleUpdatePackage(db, req, res)})
+app.post('/getpackage', (req, res) => {packages.handleGetPackage(db, req, res)})
+app.post('/addpackage', (req, res) => {packages.handleAddPackage(db, req, res)})
+app.post('/trainergetclient', (req, res) => {trainer.handleTrainerGetClient(db, req, res)})
+app.post('/getclients', (req, res) => {trainer.handleGetClients(db, req, res)})
+//app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 
-app.get('/profile/:id', (req, res) => {
-	const { id } = req.params;
-	db.select('*').from('users').where({id})
-	.then(user => {
-		if(user.length) {
-			res.json(user[0])
-		} else {
-			res.status(400).json('User Not Found')
-		}
-		})
-		.catch(err => res.status(400).json('Error getting user'))
-})
 
-//app.post('/signin', signin.handleSignin(db, bcrypt))
-app.post('/signin', (req, res) => {
-	const { email, password } = req.body;
-	check.checkForEmail(email, res);
-	check.checkForPassword(password, res);
-	db.select('email', 'hash').from('login')
-	.where('email', '=', email)
-	.then(data => {
-		const isValid = bcrypt.compareSync(password, data[0].hash);
-		if(isValid) {
-			return db.select('*').from('users')
-			.where('email', '=', email)
-			.then(user => {
-				res.json(user[0])
-			})
-			.catch(err => res.status(400).json('Unable to get user'))
-		} else {
-				res.status(400).json('Wrong credentials')
-		}
-	})
-	.catch(err => res.status(400).json('Wrong credentials'))
-})
+app.listen(3001, () => {
+	console.log('Training Tracker Server is running on port 3001');
+});
+
 
 //Gets the client information for a trainer
-app.post('/trainergetclient', (req, res) => {
+/*app.post('/trainergetclient', (req, res) => {
 	return db.select('*').from('users')
 			.where('email', '=', req.body.email)
 			.then(user => {
 				res.json(user[0])
 			})
 			.catch(err => res.status(400).json('Unable to get user'))
-		}) 
+		}) */
 
-app.post('/register', (req, res) => {
-const { email, fname, lname, password, height} = req.body
-check.checkForEmail(email, res);
-check.checkForPassword(password, res);
-const hash = bcrypt.hashSync(password);
-	db.transaction(trx => {
-		trx.insert({
-			hash: hash,
-			email: email
-		})
-		.into('login')
-		.returning('email')
-		.then(loginEmail => {
-			return trx('users')
-			.returning('*')
-			.insert({
-				fname: fname,
-				lname: lname,
-				email: loginEmail[0],
-				height: height,
-				joined: new Date(),
-				isadmin: false,
-				istrainer: false,
-				trainer: 'Desire'
-				})
-				.then(user => {
-					res.json(user[0]);
-					})
-			})
-		.then(trx.commit)
-		.catch(trx.rollback)
-	})
-	.catch(err => res.status(400).json('Unable to register'))	
-})
 
-//Takes data from Training Date Input Form and send it to the DB
-app.post('/addtraining', (req, res) => {
-	const {sessiondate, email, packageid, packagedate} = req.body;
-		db('sessions')
-		.returning('*')
-		.insert({	
-					email: email,
-					sessiondate: sessiondate,
-					packageid: packageid,
-					packagedate: packagedate
-				}).then( user => {
-		res.json(user[0]);
-	})
-	.catch(err => res.status(400).json('Unable to add training session'))	
-})
-
-// Increments the package used field in Packages table
+/*// Increments the package used field in Packages table
 app.post('/updatepackage', (req, res) => {
 	const { email, packageid } = req.body;
 	db('package')
@@ -167,7 +90,7 @@ app.post('/addpackage', (req, res) => {
 		db.update('active', false).from('package')
 				.where('email', '=', email, 'active', '=', true)
 /*				.then(info => {
-					res.json(user[0])*/
+					res.json(user[0])
 				.catch(err => res.status(400).json('Unable to update package: active'))
 }
 
@@ -188,52 +111,6 @@ app.post('/addpackage', (req, res) => {
 	.catch(err => res.status(400).json('Unable to add package' + err))
 })
 
-// Returns all of the training sessions for the user under the current package
-app.post('/gettrainings', (req, res) => {
-	const { email, packageid } = req.body;
-	return db.select('*').from('sessions')
-	.where({email: email})
-	.then(train => {
-		if(train.length) {
-			res.json(train)
-		} else {
-			res.status(400).json('User training sessions not found')
-		}
-		})
-		.catch(err => res.status(400).json(err + 'Error getting training information'))
-})
-
-//Takes data from Stats Input Form and send it to the DB
-app.post('/addstats', (req, res) => {
-	const {name, height, weight, musclemass, fatlevel, bmi, vv, percentwater, statsdate, email} = req.body
-		db('stats')
-		.returning('*')
-		.insert({	
-				email: email,
-				weight: weight,
-				musclemass:musclemass,
-				fatlevel: fatlevel,
-				bmi: bmi,
-				vv:vv,
-				percentwater: percentwater,
-				statsdate: statsdate
-				}).then( user => {
-		res.json(user[0]);
-
-	})
-	.catch(err => res.status(400).json('Unable to add measurements'))
-})
-
-// Returns all of the stats for a user
-app.post('/getstats', (req, res) => {
-	const { email} = req.body;
-	return db.select('*').from('stats')
-	.where('email', '=', email)
-	.then(data => {
-		res.json(data)
-	})
-	.catch(err => res.status(400).json('Unable to get stats history'))
-})
 
 app.post('/getpackage', (req, res) => {
 	const { email } = req.body;
@@ -247,8 +124,8 @@ app.post('/getpackage', (req, res) => {
 		})
 		.catch(err => res.status(400).json(err + 'Error getting package information'))
 })
-
-app.post('/getclients', (req,res) => {
+*/
+/*app.post('/getclients', (req,res) => {
 	//get clients of a trainer
 	const { trainer } = req.body;
 	
@@ -263,15 +140,6 @@ app.post('/getclients', (req,res) => {
 		res.json(list); 
 	})
 	.catch(err => res.status(400).json(err + ' Error getting clients package information'));
-})
+})*/
 
-//app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
 
-//app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
-
-//app.put('/image', (req, res) => { image.handleImage(req, res, db)})
-//app.post('/imageurl', (req, res) => { image.handleApiCall(req, res)})
-
-app.listen(3001, () => {
-	console.log('Training Tracker Server is running on port 3001');
-});
