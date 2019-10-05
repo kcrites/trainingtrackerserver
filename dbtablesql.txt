@@ -43,6 +43,7 @@ CREATE TABLE users (
 	fname varchar(100),
 	lname varchar(100),
 	email text NOT NULL,
+	privacy boolean NOT NULL,
 	joined timestamp NOT NULL,
 	height smallint,
 	isadmin boolean,
@@ -50,15 +51,19 @@ CREATE TABLE users (
 	trainer varchar(100));
 
 
-db('users')
-	.returning('*')
-	.insert({
-	fname: fname,
-	lname: lname,
-	email: email,
-	height: height,
-	joined: new Date(),
-	isadmin: false
+return trx('users')
+				.returning('*')
+				.insert({
+					fname: fname,
+					lname: lname,
+					email: loginEmail[0],
+					height: height,
+					privacy: privacy,
+					joined: new Date(),
+					isadmin: false,
+					istrainer: false,
+					trainer: 'Desire'
+					})
 
 //Login Table
 CREATE TABLE login (
@@ -78,3 +83,26 @@ CREATE TABLE sessions (
 
 	SELECT * FROM users LEFT OUTER JOIN package ON users.email = package.email WHERE users.email IN (SELECT email FROM users WHERE users.trainer = 'Desire') AND (package.packageid IS NULL OR package.active IS true);
 
+
+CREATE TABLE plan (
+	id serial PRIMARY KEY,
+	sessiondate date NOT NULL,
+	email text NOT NULL,
+	group0,
+	group1,
+	group2,
+	group3,
+	group4,
+	group5,
+	group6,
+	exercise1 varchar(100),
+	exercise2 varchar(100),
+	exercise3 varchar(100),
+	exercise4 varchar(100),
+	exercise5 varchar(100),
+	exercise6 varchar(100),
+	exercise7 varchar(100),
+	exercise8 varchar(100),
+	exercise9 varchar(100),
+	exercise10 varchar(100)
+);

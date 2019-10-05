@@ -1,4 +1,6 @@
-app.get('/', (req, res) => {
+
+const handleAll = (db, req, res) => {
+//app.get('/', (req, res) => {
 	return db.select('*').from('users')
 	.then(users => {
 	if(users.length) {
@@ -8,9 +10,11 @@ app.get('/', (req, res) => {
 		res.status(400).json('No Users in DB')
 	}
 }).catch(err => res.status(400).json('Error getting users list'))
-})
+}
 
-app.get('/profile/:id', (req, res) => {
+const handleProfile = (db, req, res) => {
+
+//app.get('/profile/:id', (req, res) => {
 	const { id } = req.params;
 	db.select('*').from('users').where({id})
 	.then(user => {
@@ -21,4 +25,9 @@ app.get('/profile/:id', (req, res) => {
 		}
 		})
 		.catch(err => res.status(400).json('Error getting user'))
-})
+}
+
+module.exports = {
+	handleAll: handleAll,
+	handleProfile: handleProfile
+};
