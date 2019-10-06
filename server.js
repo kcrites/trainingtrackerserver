@@ -11,7 +11,7 @@ const packages = require('./controllers/packages');
 const training = require('./controllers/training');
 const trainer = require('./controllers/trainer');
 const stats = require('./controllers/stats');
-//const workout = require('./controllers/workout');
+const workout = require('./controllers/workout');
 //const info = require('./controllers/info');
 
 const db = knex({
@@ -42,7 +42,7 @@ app.post('/getpackage', (req, res) => {packages.handleGetPackage(db, req, res)})
 app.post('/addpackage', (req, res) => {packages.handleAddPackage(db, req, res)})
 app.post('/trainergetclient', (req, res) => {trainer.handleTrainerGetClient(db, req, res)})
 app.post('/getclients', (req, res) => {trainer.handleGetClients(db, req, res)})
-//app.post('/updateworkout', (req, res) => {trainer.handleUpdateWorkout(db, req, res)})
+app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, res)})
 //app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 
 
