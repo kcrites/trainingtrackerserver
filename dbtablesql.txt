@@ -84,17 +84,17 @@ CREATE TABLE sessions (
 	SELECT * FROM users LEFT OUTER JOIN package ON users.email = package.email WHERE users.email IN (SELECT email FROM users WHERE users.trainer = 'Desire') AND (package.packageid IS NULL OR package.active IS true);
 
 
-CREATE TABLE plan (
+CREATE TABLE workout (
 	id serial PRIMARY KEY,
-	sessiondate date NOT NULL,
+	workoutdate date NOT NULL,
 	email text NOT NULL,
-	group0,
-	group1,
-	group2,
-	group3,
-	group4,
-	group5,
-	group6,
+	group0 varchar(100),
+	group1 varchar(100),
+	group2 varchar(100),
+	group3 varchar(100),
+	group4 varchar(100),
+	group5 varchar(100),
+	group6 varchar(100),
 	exercise1 varchar(100),
 	exercise2 varchar(100),
 	exercise3 varchar(100),
@@ -106,3 +106,17 @@ CREATE TABLE plan (
 	exercise9 varchar(100),
 	exercise10 varchar(100)
 );
+
+CREATE TABLE workoutgroup (
+	id serial PRIMARY KEY,
+	workoutdate DATE NOT NULL,
+	email text NOT NULL,
+	workoutgroup SMALLINT NOT null);
+
+
+CREATE TABLE workoutexercise (
+	id serial PRIMARY KEY,
+	workoutdate DATE NOT NULL,
+	email text NOT NULL,
+	workoutgroup SMALLINT NOT NULL,
+	exercise varchar(100));

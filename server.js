@@ -43,6 +43,7 @@ app.post('/addpackage', (req, res) => {packages.handleAddPackage(db, req, res)})
 app.post('/trainergetclient', (req, res) => {trainer.handleTrainerGetClient(db, req, res)})
 app.post('/getclients', (req, res) => {trainer.handleGetClients(db, req, res)})
 app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, res)})
+app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
 //app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 
 
