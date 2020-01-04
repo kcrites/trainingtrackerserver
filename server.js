@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
 
+const PORT = process.env.PORT || 3005;
+
 //Controllers
 const register = require('./controllers/register');
 const signin = require('./controllers/signin');
@@ -24,6 +26,13 @@ const db = knex({
   }
 });
 
+/* const db = knex({
+    client: 'pg',
+    connection: {
+        connectionString: process.env.DATABASE_URL,
+        ssl: true,
+    }
+});  */
 
 const app = express();
 
@@ -47,102 +56,7 @@ app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
 //app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 
 
-app.listen(3001, () => {
-	console.log('Training Tracker Server is running on port 3001');
+app.listen(PORT, () => {
+	console.log(`PT Tracker Server is running on port ${PORT}`);
 });
-
-
-//Gets the client information for a trainer
-/*app.post('/trainergetclient', (req, res) => {
-	return db.select('*').from('users')
-			.where('email', '=', req.body.email)
-			.then(user => {
-				res.json(user[0])
-			})
-			.catch(err => res.status(400).json('Unable to get user'))
-		}) */
-
-
-/*// Increments the package used field in Packages table
-app.post('/updatepackage', (req, res) => {
-	const { email, packageid } = req.body;
-	db('package')
-	.where(
-		'packageid', '=', packageid, 'email', '=', email, 
-	)
-	.increment('sessioncount', 1)
-	.returning('*')
-	.then(pack =>{
-		//console.log(`pack: ${pack[0]} sessioncount: ${pack[0].sessioncount}, maxsessions: ${pack[0].maxsessions}`)
-		if(pack[0].maxsessions === pack[0].sessioncount){
-			return db.update('completed', true).from('package')
-			.where('packageid', '=', packageid, 'email', '=', email)
-			.then(info => {
-				res.json(pack)})
-		} else{
-				res.json(pack);
-		}
-	})
-	.catch(err => res.status(400).json('Unable to increment session count'))	
-})
-
-app.post('/addpackage', (req, res) => {
-	const { email, maxsessions, packagedate, packageid, newpackage } = req.body;
-	console.log(`${email} ${maxsessions} ${packagedate} ${packageid}`)
-	if(!newpackage) {
-		db.update('active', false).from('package')
-				.where('email', '=', email, 'active', '=', true)
-/*				.then(info => {
-					res.json(user[0])
-				.catch(err => res.status(400).json('Unable to update package: active'))
-}
-
-	return db('package')
-	.returning('*')
-	.insert({	
-			email: email,
-			packageid: packageid,
-			sessioncount: 0,
-			maxsessions: maxsessions,
-			completed: false,
-			active: true,
-			datestarted: packagedate
-			})
-	.then(user => {
-		res.json(user[0])
-	})
-	.catch(err => res.status(400).json('Unable to add package' + err))
-})
-
-
-app.post('/getpackage', (req, res) => {
-	const { email } = req.body;
-	db('package').where({email: email, active: true}).select('*')
-	.then(pack => {
-		if(pack.length) {
-			res.json(pack[0])
-		} else {
-			res.status(400).json('User Package Not Found')
-		}
-		})
-		.catch(err => res.status(400).json(err + 'Error getting package information'))
-})
-*/
-/*app.post('/getclients', (req,res) => {
-	//get clients of a trainer
-	const { trainer } = req.body;
-	
-	db('package')
-	.select('*')
-	.rightOuterJoin('users', 'users.email', '=', 'package.email')
-	.where('users.trainer', '=', trainer)
-	.andWhere('package.active', '=', true)
-	.orWhere(db.raw('package.packageid is NULL'))
-	.andWhere('users.istrainer', '=', false)
-	.then(list => {
-		res.json(list); 
-	})
-	.catch(err => res.status(400).json(err + ' Error getting clients package information'));
-})*/
-
 
