@@ -19,6 +19,7 @@ const handleGetTrainings = (db, req, res) => {
 	const { email, packageid } = req.body;
 	return db.select('*').from('sessions')
 	.where({email: email})
+	.orderBy('sessiondate')
 	.then(train => {
 		if(train.length) {
 			res.json(train)

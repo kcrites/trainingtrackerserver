@@ -25,6 +25,7 @@ const handleGetStats = (db, req, res) => {
 	const { email } = req.body;
 	return db.select('*').from('stats')
 	.where('email', '=', email)
+	.orderBy('statsdate')
 	.then(data => {
 		res.json(data)
 	})
