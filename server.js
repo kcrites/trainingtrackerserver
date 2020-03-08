@@ -14,9 +14,9 @@ const training = require('./controllers/training');
 const trainer = require('./controllers/trainer');
 const stats = require('./controllers/stats');
 const workout = require('./controllers/workout');
-//const info = require('./controllers/info');
+const version = '1.75';
 
-/* const db = knex({
+const db = knex({
   client: 'pg',
   connection: {
    host : '127.0.0.1',
@@ -24,15 +24,15 @@ const workout = require('./controllers/workout');
    password: '',
    database: 'trainingtest'
   }
-}); */
+}); 
 
- const db = knex({
+/*  const db = knex({
     client: 'pg',
     connection: {
         connectionString: process.env.DATABASE_URL,
         ssl: true,
     }
-});  
+});   */
 
 const app = express();
 
@@ -53,8 +53,10 @@ app.post('/trainergetclient', (req, res) => {trainer.handleTrainerGetClient(db, 
 app.post('/getclients', (req, res) => {trainer.handleGetClients(db, req, res)})
 app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, res)})
 app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
-//app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 
+app.get('/', (req, res) => {
+    res.send('trainingtrackerDB working, ' + version)
+});
 
 app.listen(PORT, () => {
 	console.log(`PT Tracker Server is running on port ${PORT}`);
