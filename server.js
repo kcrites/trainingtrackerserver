@@ -16,7 +16,7 @@ const stats = require('./controllers/stats');
 const workout = require('./controllers/workout');
 const version = '1.75';
 
-const db = knex({
+/* const db = knex({
   client: 'pg',
   connection: {
    host : '127.0.0.1',
@@ -24,15 +24,15 @@ const db = knex({
    password: '',
    database: 'trainingtest'
   }
-}); 
+});  */
 
-/*  const db = knex({
+ const db = knex({
     client: 'pg',
     connection: {
         connectionString: process.env.DATABASE_URL,
         ssl: true,
     }
-});   */
+});  
 
 const app = express();
 
