@@ -22,7 +22,7 @@ const handleUpdatePackage = (db, req, res) => {
 
 const handleAddPackage = (db, req, res) => {
 	const { email, maxsessions, packagedate, packageid, newpackage } = req.body;
-	console.log(`${email} ${maxsessions} ${packagedate} ${packageid}`)
+	
 	if(!newpackage) {
 		db.update('active', false).from('package')
 				.where('email', '=', email, 'active', '=', true)
