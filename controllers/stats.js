@@ -1,7 +1,7 @@
 
 //Takes data from Stats Input Form and send it to the DB
 const handleAddStats = (db, req, res) => {
-		const {name, height, weight, musclemass, fatlevel, bmi, vv, percentwater, statsdate, email} = req.body
+		const { weight, musclemass, fatlevel, bmi, vv, percentwater, statsdate, email} = req.body
 		db('stats')
 		.returning('*')
 		.insert({	
