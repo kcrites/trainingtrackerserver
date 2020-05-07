@@ -41,7 +41,7 @@ app.use(cors());
 
 
 app.post('/signin', signin.handleSignin(db, bcrypt))
-app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
+app.post('/register', (req, res) => {register.handleRegister(req, res, db)})
 app.post('/addtraining', (req, res) => {training.handleAddTraining(db, req, res)})
 app.post('/gettrainings', (req, res) => {training.handleGetTrainings(db, req, res)})
 app.post('/addstats', (req, res) => {stats.handleAddStats(db, req, res)})

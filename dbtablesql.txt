@@ -120,3 +120,11 @@ CREATE TABLE workoutexercise (
 	email text NOT NULL,
 	workoutgroup SMALLINT NOT NULL,
 	exercise varchar(100));
+
+CREATE TABLE trainers  (
+	id serial PRIMARY KEY,
+	name varchar(100),
+	email text NOT NULL,
+	url varchar,
+	phone varchar(30),
+	image varchar(50));
