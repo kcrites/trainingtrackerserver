@@ -12,9 +12,9 @@ const handleUpdatePackage = (db, req, res) => {
 			return db.update('completed', true).from('package')
 			.where('packageid', '=', packageid, 'email', '=', email)
 			.then(info => {
-				res.json(pack)})
+				res.json(pack[0])})
 		} else{
-				res.json(pack);
+				res.json(pack[0]);
 		}
 	})
 	.catch(err => res.status(400).json('Unable to increment session count'))	
