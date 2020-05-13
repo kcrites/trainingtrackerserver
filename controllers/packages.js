@@ -12,6 +12,7 @@ const handleUpdatePackage = (db, req, res) => {
 			return db.update('completed', true).from('package')
 			.where('packageid', '=', packageid, 'email', '=', email)
 			.then(info => {
+				pack[0].completed = true;
 				res.json(pack[0])})
 		} else{
 				res.json(pack[0]);
