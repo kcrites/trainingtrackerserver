@@ -55,8 +55,8 @@ app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, r
 app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
 
 app.get('/', (req, res) => {
-   setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 5000);
-   // res.send('training tracker DB working, ' + version)
+   //setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 5000);
+    res.send('training tracker DB working, ' + version)
 });
 
 app.listen(PORT, () => {
