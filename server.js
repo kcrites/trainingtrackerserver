@@ -16,7 +16,7 @@ const stats = require('./controllers/stats');
 const workout = require('./controllers/workout');
 const version = '1.75';
 
-/* const db = knex({
+const db = knex({
   client: 'pg',
   connection: {
    host : '127.0.0.1',
@@ -24,15 +24,15 @@ const version = '1.75';
    password: '',
    database: 'trainingtest'
   }
-});  */
+}); 
 
- const db = knex({
+/*  const db = knex({
     client: 'pg',
     connection: {
         connectionString: process.env.DATABASE_URL,
         ssl: true,
     }
-});  
+});   */
 
 const app = express();
 
@@ -44,6 +44,7 @@ app.post('/signin', signin.handleSignin(db, bcrypt))
 app.post('/register', (req, res) => {register.handleRegister(req, res, db)})
 app.post('/addtraining', (req, res) => {training.handleAddTraining(db, req, res)})
 app.post('/gettrainings', (req, res) => {training.handleGetTrainings(db, req, res)})
+app.post('/deletetraining', (req, res) => {training.handleDeleteTraining(db, req, res)})
 app.post('/addstats', (req, res) => {stats.handleAddStats(db, req, res)})
 app.post('/getstats', (req, res) => {stats.handleGetStats(db, req, res)})
 app.post('/updatepackage', (req, res) => {packages.handleUpdatePackage(db, req, res)})
@@ -55,8 +56,8 @@ app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, r
 app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
 
 app.get('/', (req, res) => {
-   //setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 5000);
-    res.send('training tracker DB working, ' + version)
+   setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 5000);
+   // res.send('training tracker DB working, ' + version)
 });
 
 app.listen(PORT, () => {
