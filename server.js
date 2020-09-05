@@ -16,7 +16,7 @@ const stats = require('./controllers/stats');
 const workout = require('./controllers/workout');
 const version = '1.75';
 
-const db = knex({
+/* const db = knex({
   client: 'pg',
   connection: {
    host : '127.0.0.1',
@@ -24,15 +24,15 @@ const db = knex({
    password: '',
    database: 'trainingtest'
   }
-}); 
+});  */
 
-/*  const db = knex({
+ const db = knex({
     client: 'pg',
     connection: {
         connectionString: process.env.DATABASE_URL,
         ssl: true,
     }
-});   */
+});  
 
 const app = express();
 
@@ -56,7 +56,7 @@ app.post('/updateworkout', (req, res) => {workout.handleUpdateWorkout(db, req, r
 app.post('/getworkout', (req, res) => {workout.handleGetWorkout(db, req, res)})
 
 app.get('/', (req, res) => {
-   setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 5000);
+   setTimeout(() => {   res.send('training tracker DB working, ' + version); }, 2000);
    // res.send('training tracker DB working, ' + version)
 });
 

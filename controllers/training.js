@@ -41,12 +41,10 @@ const handleDeleteTraining = (db, req, res) => {
 				.where('packageid', '=', packid)
 				.decrement('sessioncount', 1)
 				.then(user => {
-					//res.json('Session Deleted and Package Updated')
 					message = 'Session Deleted and Package Updated';
 				})
 				.catch(err => res.status(400).json('Unable to Delete Training' + err))
 			} else {
-					//res.status(200).json('Session deleted')
 					message = 'Session deleted';
 			}
 		}).then(data => {
@@ -65,8 +63,6 @@ const handleDeleteTraining = (db, req, res) => {
 		.catch(err => res.status(400).json('Error Deleting Session ' + err))
 	 
 		//completedFlag is true if it was set by the training session now being deleted.
-	
-
 };
 
 	 
